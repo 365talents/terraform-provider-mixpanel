@@ -44,11 +44,11 @@ func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaReques
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"service_account_username": schema.StringAttribute{
-				MarkdownDescription: "Mixpanel Service Account username",
+				MarkdownDescription: "Mixpanel Service Account username (Environment variable: MIXPANEL_SERVICE_ACCOUNT_USERNAME)",
 				Optional:            true,
 			},
 			"service_account_secret": schema.StringAttribute{
-				MarkdownDescription: "Mixpanel Service Account secret",
+				MarkdownDescription: "Mixpanel Service Account secret (Environment variable: MIXPANEL_SERVICE_ACCOUNT_SECRET)",
 				Optional:            true,
 				Sensitive: 				 	 true,
 			},
