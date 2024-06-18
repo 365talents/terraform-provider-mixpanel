@@ -64,12 +64,12 @@ func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 }
 
 type ProjectModel struct {
-	Id       	types.Int64	`tfsdk:"id"`
-	Name     	string 			`tfsdk:"name"`
-	Domain   	string 			`tfsdk:"domain"`
-	Timezone 	string 			`tfsdk:"timezone"`
-	ApiKey 		basetypes.StringValue			`tfsdk:"api_key"`
-	Token 		basetypes.StringValue			`tfsdk:"token"`
+	Id       	types.Int64							`tfsdk:"id"`
+	Name     	basetypes.StringValue 	`tfsdk:"name"`
+	Domain   	basetypes.StringValue 	`tfsdk:"domain"`
+	Timezone 	basetypes.StringValue 	`tfsdk:"timezone"`
+	ApiKey 		basetypes.StringValue		`tfsdk:"api_key"`
+	Token 		basetypes.StringValue		`tfsdk:"token"`
 }
 
 // Read refreshes the Terraform state with the latest data.
@@ -89,14 +89,7 @@ func (d *ProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	projectState := ProjectModel{
-		Id:          types.Int64Value(project.Id),
-		Name:        project.Name,
-		Domain:      project.Domain,
-		Timezone:    project.Timezone,
-		ApiKey:      basetypes.NewStringValue(project.ApiKey),
-		Token:       basetypes.NewStringValue(project.Token),
-	}
+	projectState := ProjectToProjectModel(project)
 
 	// Set state
 	diags := resp.State.Set(ctx, &projectState)

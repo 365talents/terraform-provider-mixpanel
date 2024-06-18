@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"terraform-provider-mixpanel/internal/mixpanel"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -17,8 +18,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &projectResource{}
-	_ resource.ResourceWithConfigure = &projectResource{}
+	_ resource.Resource              		= &projectResource{}
+	_ resource.ResourceWithConfigure 		= &projectResource{}
+	_ resource.ResourceWithImportState 	= &projectResource{}
 )
 
 // NewProjectResource is a helper function to simplify the provider implementation.
@@ -114,8 +116,8 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Update the state with the refreshed data
-	state.Name = project.Name
-	state.Timezone = project.Timezone
+	state.Name = basetypes.NewStringValue(project.Name)
+	state.Timezone = basetypes.NewStringValue(project.Timezone)
 
 	state = ProjectToProjectModel(project)
 
@@ -150,7 +152,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if plan.Name != state.Name {
-		err := r.client.UpdateProjectName(state.Id.ValueInt64(), plan.Name)
+		err := r.client.UpdateProjectName(state.Id.ValueInt64(), plan.Name.String())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to update Mixpanel Project Name",
@@ -161,7 +163,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if plan.Timezone != state.Timezone {
-		err := r.client.UpdateProjectTimezone(state.Id.ValueInt64(), plan.Timezone)
+		err := r.client.UpdateProjectTimezone(state.Id.ValueInt64(), plan.Timezone.String())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to update Mixpanel Project Timezone",
@@ -194,9 +196,9 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	data := mixpanel.Project{
-		Name:     plan.Name,
-		Domain:   plan.Domain,
-		Timezone: plan.Timezone,
+		Name:     plan.Name.String(),
+		Domain:   plan.Domain.String(),
+		Timezone: plan.Timezone.String(),
 	}
 
 	newProject, err := r.client.CreateProject(&data)
@@ -207,8 +209,6 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		)
 		return
 	}
-	
-	//plan.Id = types.Int64Value(newProject.Id)
 
 	project, err := r.client.GetProject(newProject.Id)
 	if err != nil {
@@ -227,13 +227,28 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 }
 
+func (r *projectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+
+	id, err := strconv.Atoi(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Invalid ID",
+			"ID must be an integer",
+		)
+		return
+	}
+	
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
+}
+
 
 func ProjectToProjectModel(project *mixpanel.Project) ProjectModel {
 	return ProjectModel{
 		Id:       	types.Int64Value(project.Id),
-		Name:     	project.Name,
-		Domain:   	project.Domain,
-		Timezone: 	project.Timezone,
+		Name:     	basetypes.NewStringValue(project.Name),
+		Domain:   	basetypes.NewStringValue(project.Domain),
+		Timezone: 	basetypes.NewStringValue(project.Timezone),
 		ApiKey:     basetypes.NewStringValue(project.ApiKey),
 		Token:      basetypes.NewStringValue(project.Token),
 	}

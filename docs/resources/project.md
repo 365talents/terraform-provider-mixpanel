@@ -34,3 +34,12 @@ resource "mixpanel_project" "myproject" {
 - `api_key` (String, Sensitive)
 - `id` (Number) The ID of this resource.
 - `token` (String, Sensitive)
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Order can be imported by specifying the numeric identifier.
+terraform import mixpanel_project.example 123
+```
