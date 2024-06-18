@@ -103,7 +103,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	// Get refreshed order value from HashiCups
+	// Get refreshed project value from Mixpanel
 	project, err := r.client.GetProject(state.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -114,9 +114,6 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Update the state with the refreshed data
-	state.Name = basetypes.NewStringValue(project.Name)
-	state.Timezone = basetypes.NewStringValue(project.Timezone)
-
 	state = ProjectToProjectModel(project)
 
 	// Set refreshed state
@@ -132,8 +129,6 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan ProjectModel
 	var state ProjectModel
-
-	r.client.GetTimezones()
 
 	// Get the planned new state
 	diags := req.Plan.Get(ctx, &plan)
@@ -171,7 +166,17 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 	}
 
-	diags = resp.State.Set(ctx, plan)
+	// Get refreshed project value from Mixpanel
+	project, err := r.client.GetProject(state.Id.ValueInt64())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading Mixpanel Project",
+			"Could not read Mixpanel project ID "+strconv.FormatInt(state.Id.ValueInt64(), 10)+": "+err.Error(),
+		)
+		return
+	}
+
+	diags = resp.State.Set(ctx, ProjectToProjectModel(project))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
