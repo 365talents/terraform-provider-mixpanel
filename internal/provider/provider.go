@@ -132,21 +132,18 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *MixpanelProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
 		NewProjectResource,
 	}
 }
 
 func (p *MixpanelProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
 		NewprojectDataSource,
 	}
 }
 
 func (p *MixpanelProvider) Functions(ctx context.Context) []func() function.Function {
 	return []func() function.Function{
-		NewExampleFunction,
 	}
 }
 
