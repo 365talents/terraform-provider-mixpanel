@@ -86,6 +86,14 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 		return nil, err
 	}
 
+	organization, err := c.GetOrganizations()
+	if err != nil {
+		return nil, err
+	}
+
+	// We only support one organization for now
+	organizationId := organization[0].Id
+
 	data := createProjectBody{
 		Name:     project.Name,
 		ClusterId: clusterId,
@@ -98,7 +106,7 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 	}
 
 	// TODO: get current organization ID from the user
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/app/organizations/759456/create-project", c.HostURL), bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/app/organizations/%d/create-project", c.HostURL, organizationId), bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
