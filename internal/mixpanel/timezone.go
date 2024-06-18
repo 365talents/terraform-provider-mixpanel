@@ -52,7 +52,10 @@ func (c *Client) GetTimezoneId(name string) (int64, error) {
 		return 0, err
 	}
 
+	fmt.Printf("Timezones: %v", timezones)
+
 	for _, timezone := range timezones {
+		fmt.Printf("%s %s", timezone.Name, name)
 		if timezone.Name == name {
 			return timezone.Id, nil
 		}

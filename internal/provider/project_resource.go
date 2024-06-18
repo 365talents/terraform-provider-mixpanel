@@ -150,7 +150,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if plan.Name != state.Name {
-		err := r.client.UpdateProjectName(state.Id.ValueInt64(), plan.Name.String())
+		err := r.client.UpdateProjectName(state.Id.ValueInt64(), plan.Name.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to update Mixpanel Project Name",
@@ -161,7 +161,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if plan.Timezone != state.Timezone {
-		err := r.client.UpdateProjectTimezone(state.Id.ValueInt64(), plan.Timezone.String())
+		err := r.client.UpdateProjectTimezone(state.Id.ValueInt64(), plan.Timezone.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to update Mixpanel Project Timezone",
@@ -193,9 +193,9 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	data := mixpanel.Project{
-		Name:     plan.Name.String(),
-		Domain:   plan.Domain.String(),
-		Timezone: plan.Timezone.String(),
+		Name:     plan.Name.ValueString(),
+		Domain:   plan.Domain.ValueString(),
+		Timezone: plan.Timezone.ValueString(),
 	}
 
 	newProject, err := r.client.CreateProject(&data)
