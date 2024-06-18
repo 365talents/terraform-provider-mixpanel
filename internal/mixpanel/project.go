@@ -10,26 +10,26 @@ import (
 )
 
 type Project struct {
-	Id       	int64	 	`json:"id"`
-	Name     	string	`json:"name"`
-	Domain   	string	`json:"domain"`
-	Timezone 	string	`json:"timezone_name"`
-	ApiKey	 	string 	`json:"api_key"`
-	Token	 		string 	`json:"token"`
+	Id       int64  `json:"id"`
+	Name     string `json:"name"`
+	Domain   string `json:"domain"`
+	Timezone string `json:"timezone_name"`
+	ApiKey   string `json:"api_key"`
+	Token    string `json:"token"`
 }
 
 type ProjectResponse struct {
-	Status 	string 									`json:"status"`
-	Results ProjectResponseResults 	`json:"results"`
+	Status  string                 `json:"status"`
+	Results ProjectResponseResults `json:"results"`
 }
 
 type ProjectResponseResults struct {
-	Id 		  	int64  	`json:"id"`
-	Name     	string	`json:"name"`
-	Domain   	string	`json:"domain"`
-	Timezone 	string	`json:"timezone_name"`
-	ApiKey	 	string 	`json:"api_key"`
-	Token	 		string 	`json:"token"`
+	Id       int64  `json:"id"`
+	Name     string `json:"name"`
+	Domain   string `json:"domain"`
+	Timezone string `json:"timezone_name"`
+	ApiKey   string `json:"api_key"`
+	Token    string `json:"token"`
 }
 
 func (c *Client) GetProject(id int64) (*Project, error) {
@@ -50,14 +50,14 @@ func (c *Client) GetProject(id int64) (*Project, error) {
 	}
 
 	project := Project{
-		Id: response.Results.Id,
-		Name: response.Results.Name,
+		Id:       response.Results.Id,
+		Name:     response.Results.Name,
 		Timezone: response.Results.Timezone,
-		ApiKey: response.Results.ApiKey,
-		Token: response.Results.Token,
+		ApiKey:   response.Results.ApiKey,
+		Token:    response.Results.Token,
 	}
 
-	if (response.Results.Domain == "eu.mixpanel.com") {
+	if response.Results.Domain == "eu.mixpanel.com" {
 		project.Domain = "EU"
 	} else {
 		project.Domain = "US"
@@ -67,7 +67,7 @@ func (c *Client) GetProject(id int64) (*Project, error) {
 }
 
 type createProjectBody struct {
-	Name     	 string `json:"project_name"`
+	Name       string `json:"project_name"`
 	ClusterId  int64  `json:"cluster_id"`
 	TimezoneId int64  `json:"timezone_id"`
 }
@@ -95,8 +95,8 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 	organizationId := organization[0].Id
 
 	data := createProjectBody{
-		Name:     project.Name,
-		ClusterId: clusterId,
+		Name:       project.Name,
+		ClusterId:  clusterId,
 		TimezoneId: timezoneId,
 	}
 

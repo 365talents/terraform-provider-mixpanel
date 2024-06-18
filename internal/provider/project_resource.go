@@ -18,9 +18,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              		= &projectResource{}
-	_ resource.ResourceWithConfigure 		= &projectResource{}
-	_ resource.ResourceWithImportState 	= &projectResource{}
+	_ resource.Resource                = &projectResource{}
+	_ resource.ResourceWithConfigure   = &projectResource{}
+	_ resource.ResourceWithImportState = &projectResource{}
 )
 
 // NewProjectResource is a helper function to simplify the provider implementation.
@@ -35,31 +35,30 @@ type projectResource struct {
 
 // Configure adds the provider configured client to the resource.
 func (r *projectResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-  // Add a nil check when handling ProviderData because Terraform
-  // sets that data after it calls the ConfigureProvider RPC.
-  if req.ProviderData == nil {
-        return
-    }
+	// Add a nil check when handling ProviderData because Terraform
+	// sets that data after it calls the ConfigureProvider RPC.
+	if req.ProviderData == nil {
+		return
+	}
 
-    client, ok := req.ProviderData.(*mixpanel.Client)
+	client, ok := req.ProviderData.(*mixpanel.Client)
 
-    if !ok {
-        resp.Diagnostics.AddError(
-            "Unexpected Data Source Configure Type",
-            fmt.Sprintf("Expected *mixpanel.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-        )	
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *mixpanel.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
 
-        return
-    }
+		return
+	}
 
-    r.client = client
+	r.client = client
 }
 
 // Metadata returns the resource type name.
 func (r *projectResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
-
 
 // Schema defines the schema for the resource.
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -73,7 +72,6 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"name": schema.StringAttribute{
 				Required: true,
-
 			},
 			"domain": schema.StringAttribute{
 				Required: true,
@@ -85,11 +83,11 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Required: true,
 			},
 			"api_key": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
 				Sensitive: true,
 			},
 			"token": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
 				Sensitive: true,
 			},
 		},
@@ -110,7 +108,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Mixpanel Project",
-			"Could not read Mixpanel project ID " + strconv.FormatInt(state.Id.ValueInt64(), 10) + ": " + err.Error(),
+			"Could not read Mixpanel project ID "+strconv.FormatInt(state.Id.ValueInt64(), 10)+": "+err.Error(),
 		)
 		return
 	}
@@ -147,8 +145,8 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	// Get the current state
 	diags = req.State.Get(ctx, &state)
 	if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	if plan.Name != state.Name {
@@ -176,7 +174,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 }
 
@@ -185,14 +183,13 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 	// Not Implemented, Service Account does not have permission to delete projects and we don't support any other authentication method yet
 }
 
-
 // Create creates the resource and sets the initial Terraform state.
 func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan ProjectModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 
 	data := mixpanel.Project{
@@ -223,7 +220,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	diags = resp.State.Set(ctx, ProjectToProjectModel(project))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 }
 
@@ -238,18 +235,17 @@ func (r *projectResource) ImportState(ctx context.Context, req resource.ImportSt
 		)
 		return
 	}
-	
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 }
 
-
 func ProjectToProjectModel(project *mixpanel.Project) ProjectModel {
 	return ProjectModel{
-		Id:       	types.Int64Value(project.Id),
-		Name:     	basetypes.NewStringValue(project.Name),
-		Domain:   	basetypes.NewStringValue(project.Domain),
-		Timezone: 	basetypes.NewStringValue(project.Timezone),
-		ApiKey:     basetypes.NewStringValue(project.ApiKey),
-		Token:      basetypes.NewStringValue(project.Token),
+		Id:       types.Int64Value(project.Id),
+		Name:     basetypes.NewStringValue(project.Name),
+		Domain:   basetypes.NewStringValue(project.Domain),
+		Timezone: basetypes.NewStringValue(project.Timezone),
+		ApiKey:   basetypes.NewStringValue(project.ApiKey),
+		Token:    basetypes.NewStringValue(project.Token),
 	}
 }

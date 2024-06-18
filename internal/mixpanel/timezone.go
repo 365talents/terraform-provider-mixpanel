@@ -7,12 +7,12 @@ import (
 )
 
 type Timezone struct {
-	Id			 int64  `json:"id"`
-	Name		 string `json:"name"`
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 type TimezoneResponse struct {
-	Status string     			`json:"status"`
+	Status  string          `json:"status"`
 	Results [][]interface{} `json:"results"`
 }
 

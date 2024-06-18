@@ -37,7 +37,7 @@ func (p *MixpanelProvider) Metadata(ctx context.Context, req provider.MetadataRe
 // MixpanelProviderModel maps provider schema data to a Go type.
 type MixpanelProviderModel struct {
 	ServiceAccountUsername types.String `tfsdk:"service_account_username"`
-	ServiceAccountSecret types.String `tfsdk:"service_account_secret"`
+	ServiceAccountSecret   types.String `tfsdk:"service_account_secret"`
 }
 
 func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
@@ -50,7 +50,7 @@ func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaReques
 			"service_account_secret": schema.StringAttribute{
 				MarkdownDescription: "Mixpanel Service Account secret (Environment variable: MIXPANEL_SERVICE_ACCOUNT_SECRET)",
 				Optional:            true,
-				Sensitive: 				 	 true,
+				Sensitive:           true,
 			},
 		},
 	}
@@ -67,22 +67,22 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 
 	if config.ServiceAccountUsername.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-				path.Root("service_account_username"),
-				"Unknown Mixpanel Service Account Username",
-				"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account Username. "+
-						"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_USERNAME environment variable.",
+			path.Root("service_account_username"),
+			"Unknown Mixpanel Service Account Username",
+			"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account Username. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_USERNAME environment variable.",
 		)
 	}
 	if config.ServiceAccountSecret.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-					path.Root("service_account_secret"),
-					"Unknown Mixpanel Service Account Secret",
-					"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account secret. "+
-							"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_SECRET environment variable.",
-			)
+		resp.Diagnostics.AddAttributeError(
+			path.Root("service_account_secret"),
+			"Unknown Mixpanel Service Account Secret",
+			"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account secret. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_SECRET environment variable.",
+		)
 	}
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 
 	serviceAccountUsername := os.Getenv("MIXPANEL_SERVICE_ACCOUNT_USERNAME")
@@ -118,7 +118,6 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 		return
 	}
 
-
 	// Create the Mixpanel API client
 	client, err := mixpanel.NewClient(&serviceAccountUsername, &serviceAccountSecret)
 	if err != nil {
@@ -143,8 +142,7 @@ func (p *MixpanelProvider) DataSources(ctx context.Context) []func() datasource.
 }
 
 func (p *MixpanelProvider) Functions(ctx context.Context) []func() function.Function {
-	return []func() function.Function{
-	}
+	return []func() function.Function{}
 }
 
 func New(version string) func() provider.Provider {

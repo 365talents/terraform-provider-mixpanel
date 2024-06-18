@@ -7,17 +7,17 @@ import (
 )
 
 type MeResponse struct {
-	Status 	string 	`json:"status"`
-	Results MeResults 	`json:"results"`
+	Status  string    `json:"status"`
+	Results MeResults `json:"results"`
 }
 
 type MeResults struct {
-	Organizations map[string]Organization 	`json:"organizations"`
+	Organizations map[string]Organization `json:"organizations"`
 }
 
 type Organization struct {
-	Id 		  	int64  	`json:"id"`
-	Name     	string	`json:"name"`
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 func (c *Client) GetOrganizations() ([]Organization, error) {
@@ -43,7 +43,7 @@ func (c *Client) GetOrganizations() ([]Organization, error) {
 
 	var orgSlice []Organization
 	for _, value := range response.Results.Organizations {
-			orgSlice = append(orgSlice, value)
+		orgSlice = append(orgSlice, value)
 	}
 
 	return orgSlice, nil

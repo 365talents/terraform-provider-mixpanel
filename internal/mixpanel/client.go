@@ -17,7 +17,7 @@ type Client struct {
 }
 
 func NewClient(serviceAccountUsername, serviceAccountSecret *string) (*Client, error) {
-	c := Client {
+	c := Client{
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
 		// Default Hashicups URL
 		HostURL: HostURL,
@@ -34,7 +34,7 @@ func NewClient(serviceAccountUsername, serviceAccountSecret *string) (*Client, e
 
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Authorization", c.AuthHeader)
-	
+
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -46,6 +46,6 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
-	
+
 	return body, err
 }

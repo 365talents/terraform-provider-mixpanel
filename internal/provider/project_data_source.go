@@ -52,11 +52,11 @@ func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed: true,
 			},
 			"api_key": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
 				Sensitive: true,
 			},
 			"token": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
 				Sensitive: true,
 			},
 		},
@@ -64,12 +64,12 @@ func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 }
 
 type ProjectModel struct {
-	Id       	types.Int64							`tfsdk:"id"`
-	Name     	basetypes.StringValue 	`tfsdk:"name"`
-	Domain   	basetypes.StringValue 	`tfsdk:"domain"`
-	Timezone 	basetypes.StringValue 	`tfsdk:"timezone"`
-	ApiKey 		basetypes.StringValue		`tfsdk:"api_key"`
-	Token 		basetypes.StringValue		`tfsdk:"token"`
+	Id       types.Int64           `tfsdk:"id"`
+	Name     basetypes.StringValue `tfsdk:"name"`
+	Domain   basetypes.StringValue `tfsdk:"domain"`
+	Timezone basetypes.StringValue `tfsdk:"timezone"`
+	ApiKey   basetypes.StringValue `tfsdk:"api_key"`
+	Token    basetypes.StringValue `tfsdk:"token"`
 }
 
 // Read refreshes the Terraform state with the latest data.
