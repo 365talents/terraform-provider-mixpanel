@@ -36,9 +36,20 @@ func (c *Client) GetTimezones() ([]Timezone, error) {
 
 	timezones := make([]Timezone, 0)
 	for _, result := range response.Results {
+
+		id, ok := result[0].(float64) // Encoder default to float64 for JSON numbers
+		if !ok {
+			return nil, fmt.Errorf("could not parse timezone id: %v", result[0])
+		}
+
+		name, ok := result[1].(string)
+		if !ok {
+			return nil, fmt.Errorf("could not parse timezone name: %v", result[1])
+		}
+
 		timezone := Timezone{
-			Id:   int64(result[0].(float64)), // Encoder default to float64 for JSON numbers
-			Name: result[1].(string),
+			Id:   int64(id),
+			Name: name,
 		}
 		timezones = append(timezones, timezone)
 	}

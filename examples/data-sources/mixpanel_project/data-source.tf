@@ -1,3 +1,3 @@
-data mixpanel_project project {
+data "mixpanel_project" "project" {
   name = "myproject"
 }

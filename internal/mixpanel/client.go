@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Default Mixpanel URL
+// Default Mixpanel URL.
 const HostURL string = "https://mixpanel.com"
 
 type Client struct {

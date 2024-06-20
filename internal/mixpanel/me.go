@@ -37,7 +37,6 @@ func (c *Client) GetOrganizations() ([]Organization, error) {
 	var response MeResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf(err.Error())
 		return nil, err
 	}
 
