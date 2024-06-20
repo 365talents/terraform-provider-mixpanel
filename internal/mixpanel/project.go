@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+// Hardcoded in the Mixpanel frontend code.
+const MixpanelUsClusterId = 1
+const MixpanelEuClusterId = 5
+
 type Project struct {
 	Id       int64  `json:"id"`
 	Name     string `json:"name"`
@@ -76,9 +80,9 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 
 	var clusterId int64
 	if project.Domain == "US" {
-		clusterId = 1
+		clusterId = MixpanelUsClusterId
 	} else {
-		clusterId = 5
+		clusterId = MixpanelEuClusterId
 	}
 
 	timezoneId, err := c.GetTimezoneId(project.Timezone)
@@ -105,7 +109,6 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 		return nil, err
 	}
 
-	// TODO: get current organization ID from the user
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/app/organizations/%d/create-project", c.HostURL, organizationId), bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
@@ -138,7 +141,7 @@ func (c *Client) UpdateProjectName(id int64, name string) error {
 		return err
 	}
 
-	req.Header.Add("Referer", fmt.Sprintf("%s", c.HostURL))
+	req.Header.Add("Referer", c.HostURL)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	_, err = c.doRequest(req)
@@ -160,7 +163,7 @@ func (c *Client) UpdateProjectTimezone(id int64, timezone string) error {
 		return err
 	}
 
-	req.Header.Add("Referer", fmt.Sprintf("%s", c.HostURL))
+	req.Header.Add("Referer", c.HostURL)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	_, err = c.doRequest(req)
