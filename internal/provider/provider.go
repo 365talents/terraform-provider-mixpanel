@@ -5,88 +5,149 @@ package provider
 
 import (
 	"context"
-	"net/http"
+	"os"
+	"terraform-provider-mixpanel/internal/mixpanel"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/function"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &ScaffoldingProvider{}
-var _ provider.ProviderWithFunctions = &ScaffoldingProvider{}
+// Ensure MixpanelProvider satisfies various provider interfaces.
+var _ provider.Provider = &MixpanelProvider{}
+var _ provider.ProviderWithFunctions = &MixpanelProvider{}
 
-// ScaffoldingProvider defines the provider implementation.
-type ScaffoldingProvider struct {
+// MixpanelProvider defines the provider implementation.
+type MixpanelProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
-}
-
-func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
+func (p *MixpanelProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "mixpanel"
 	resp.Version = p.version
 }
 
-func (p *ScaffoldingProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+// MixpanelProviderModel maps provider schema data to a Go type.
+type MixpanelProviderModel struct {
+	ServiceAccountUsername types.String `tfsdk:"service_account_username"`
+	ServiceAccountSecret   types.String `tfsdk:"service_account_secret"`
+}
+
+func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
+			"service_account_username": schema.StringAttribute{
+				MarkdownDescription: "Mixpanel Service Account username (Environment variable: MIXPANEL_SERVICE_ACCOUNT_USERNAME)",
 				Optional:            true,
+			},
+			"service_account_secret": schema.StringAttribute{
+				MarkdownDescription: "Mixpanel Service Account secret (Environment variable: MIXPANEL_SERVICE_ACCOUNT_SECRET)",
+				Optional:            true,
+				Sensitive:           true,
 			},
 		},
 	}
 }
 
-func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data ScaffoldingProviderModel
+func (p *MixpanelProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var config MixpanelProviderModel
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
+	if config.ServiceAccountUsername.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("service_account_username"),
+			"Unknown Mixpanel Service Account Username",
+			"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account Username. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_USERNAME environment variable.",
+		)
+	}
+	if config.ServiceAccountSecret.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("service_account_secret"),
+			"Unknown Mixpanel Service Account Secret",
+			"The provider cannot create the Mixpanel API client as there is an unknown configuration value for the Mixpanel Service Account secret. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_SECRET environment variable.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	serviceAccountUsername := os.Getenv("MIXPANEL_SERVICE_ACCOUNT_USERNAME")
+	serviceAccountSecret := os.Getenv("MIXPANEL_SERVICE_ACCOUNT_SECRET")
+
+	if !config.ServiceAccountUsername.IsNull() {
+		serviceAccountUsername = config.ServiceAccountUsername.ValueString()
+	}
+
+	if !config.ServiceAccountSecret.IsNull() {
+		serviceAccountSecret = config.ServiceAccountSecret.ValueString()
+	}
+
+	if serviceAccountUsername == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("service_account_username"),
+			"Mixpanel Service Account Username is required",
+			"The provider cannot create the Mixpanel API client as there is a missing or empty configuration value for the Mixpanel Service Account Username. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_USERNAME environment variable.",
+		)
+	}
+
+	if serviceAccountSecret == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("service_account_secret"),
+			"Mixpanel Service Account Secret is required",
+			"The provider cannot create the Mixpanel API client as there is missing or empty configuration value for the Mixpanel Service Account password. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the MIXPANEL_SERVICE_ACCOUNT_PASSWORD environment variable.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Create the Mixpanel API client
+	client, err := mixpanel.NewClient(&serviceAccountUsername, &serviceAccountSecret)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to create Mixpanel API client", err.Error())
+		return
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
-func (p *ScaffoldingProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *MixpanelProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
+		NewProjectResource,
 	}
 }
 
-func (p *ScaffoldingProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *MixpanelProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
+		NewprojectDataSource,
 	}
 }
 
-func (p *ScaffoldingProvider) Functions(ctx context.Context) []func() function.Function {
-	return []func() function.Function{
-		NewExampleFunction,
-	}
+func (p *MixpanelProvider) Functions(ctx context.Context) []func() function.Function {
+	return []func() function.Function{}
 }
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &ScaffoldingProvider{
+		return &MixpanelProvider{
 			version: version,
 		}
 	}
