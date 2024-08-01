@@ -44,7 +44,10 @@ func NewClient(serviceAccountUsername, serviceAccountSecret *string, concurrentR
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Authorization", c.AuthHeader)
 
-	c.Semaphore.Acquire(req.Context(), 1)
+	err := c.Semaphore.Acquire(req.Context(), 1)
+	if err != nil {
+		return nil, err
+	}
 	res, err := c.HTTPClient.Do(req)
 	c.Semaphore.Release(1)
 	if err != nil {

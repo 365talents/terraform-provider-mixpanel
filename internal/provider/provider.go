@@ -38,7 +38,7 @@ func (p *MixpanelProvider) Metadata(ctx context.Context, req provider.MetadataRe
 type MixpanelProviderModel struct {
 	ServiceAccountUsername types.String `tfsdk:"service_account_username"`
 	ServiceAccountSecret   types.String `tfsdk:"service_account_secret"`
-	ConcurrentRequests     types.Int64 `tfsdk:"concurrent_requests"`
+	ConcurrentRequests     types.Int64  `tfsdk:"concurrent_requests"`
 }
 
 func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
@@ -100,7 +100,6 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 	if !config.ServiceAccountSecret.IsNull() {
 		serviceAccountSecret = config.ServiceAccountSecret.ValueString()
 	}
-
 
 	var concurrentRequests int64 = 3
 	if !config.ConcurrentRequests.IsNull() {
