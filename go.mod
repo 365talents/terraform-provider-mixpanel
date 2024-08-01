@@ -10,6 +10,8 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 )
 
+require golang.org/x/sync v0.6.0 // indirect
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect

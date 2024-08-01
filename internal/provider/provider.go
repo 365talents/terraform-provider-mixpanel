@@ -38,6 +38,7 @@ func (p *MixpanelProvider) Metadata(ctx context.Context, req provider.MetadataRe
 type MixpanelProviderModel struct {
 	ServiceAccountUsername types.String `tfsdk:"service_account_username"`
 	ServiceAccountSecret   types.String `tfsdk:"service_account_secret"`
+	ConcurrentRequests     types.Int64 `tfsdk:"concurrent_requests"`
 }
 
 func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
@@ -51,6 +52,10 @@ func (p *MixpanelProvider) Schema(ctx context.Context, req provider.SchemaReques
 				MarkdownDescription: "Mixpanel Service Account secret (Environment variable: MIXPANEL_SERVICE_ACCOUNT_SECRET)",
 				Optional:            true,
 				Sensitive:           true,
+			},
+			"concurrent_requests": schema.Int64Attribute{
+				MarkdownDescription: "The number of concurrent requests to Mixpanel. Default is 3.",
+				Optional:            true,
 			},
 		},
 	}
@@ -96,6 +101,12 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 		serviceAccountSecret = config.ServiceAccountSecret.ValueString()
 	}
 
+
+	var concurrentRequests int64 = 3
+	if !config.ConcurrentRequests.IsNull() {
+		concurrentRequests = config.ConcurrentRequests.ValueInt64()
+	}
+
 	if serviceAccountUsername == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("service_account_username"),
@@ -119,7 +130,7 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	// Create the Mixpanel API client
-	client, err := mixpanel.NewClient(&serviceAccountUsername, &serviceAccountSecret)
+	client, err := mixpanel.NewClient(&serviceAccountUsername, &serviceAccountSecret, concurrentRequests)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create Mixpanel API client", err.Error())
 		return
