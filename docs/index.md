@@ -24,5 +24,6 @@ provider "mixpanel" {
 
 ### Optional
 
+- `concurrent_requests` (Number) The number of concurrent requests to Mixpanel. Default is 3.
 - `service_account_secret` (String, Sensitive) Mixpanel Service Account secret (Environment variable: MIXPANEL_SERVICE_ACCOUNT_SECRET)
 - `service_account_username` (String) Mixpanel Service Account username (Environment variable: MIXPANEL_SERVICE_ACCOUNT_USERNAME)

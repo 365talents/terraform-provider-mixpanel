@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"golang.org/x/sync/semaphore"
 )
 
 // Default Mixpanel URL.
@@ -14,11 +16,16 @@ type Client struct {
 	HostURL    string
 	HTTPClient *http.Client
 	AuthHeader string
+	Semaphore  *semaphore.Weighted
 }
 
-func NewClient(serviceAccountUsername, serviceAccountSecret *string) (*Client, error) {
+func NewClient(serviceAccountUsername, serviceAccountSecret *string, concurrentRequests int64) (*Client, error) {
+
+	retryClient := retryablehttp.NewClient()
+	retryClient.Backoff = retryablehttp.DefaultBackoff
+
 	c := Client{
-		HTTPClient: &http.Client{Timeout: 10 * time.Second},
+		HTTPClient: retryClient.StandardClient(),
 		// Default Hashicups URL
 		HostURL: HostURL,
 	}
@@ -29,13 +36,20 @@ func NewClient(serviceAccountUsername, serviceAccountSecret *string) (*Client, e
 
 	c.AuthHeader = "Basic " + *serviceAccountUsername + ":" + *serviceAccountSecret
 
+	c.Semaphore = semaphore.NewWeighted(concurrentRequests)
+
 	return &c, nil
 }
 
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Authorization", c.AuthHeader)
 
+	err := c.Semaphore.Acquire(req.Context(), 1)
+	if err != nil {
+		return nil, err
+	}
 	res, err := c.HTTPClient.Do(req)
+	c.Semaphore.Release(1)
 	if err != nil {
 		return nil, err
 	}
