@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -20,8 +20,12 @@ type Client struct {
 }
 
 func NewClient(serviceAccountUsername, serviceAccountSecret *string, concurrentRequests int64) (*Client, error) {
+
+	retryClient := retryablehttp.NewClient()
+	retryClient.Backoff = retryablehttp.DefaultBackoff
+
 	c := Client{
-		HTTPClient: &http.Client{Timeout: 10 * time.Second},
+		HTTPClient: retryClient.StandardClient(),
 		// Default Hashicups URL
 		HostURL: HostURL,
 	}
