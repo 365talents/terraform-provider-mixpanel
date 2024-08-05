@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.23.0
 )
 
-require golang.org/x/sync v0.6.0
+require golang.org/x/sync v0.8.0
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
