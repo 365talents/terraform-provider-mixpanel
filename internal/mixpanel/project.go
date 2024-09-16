@@ -20,6 +20,7 @@ type Project struct {
 	Timezone string `json:"timezone_name"`
 	ApiKey   string `json:"api_key"`
 	Token    string `json:"token"`
+	Secret   string `json:"secret"`
 }
 
 type ProjectResponse struct {
@@ -34,6 +35,7 @@ type ProjectResponseResults struct {
 	Timezone string `json:"timezone_name"`
 	ApiKey   string `json:"api_key"`
 	Token    string `json:"token"`
+	Secret   string `json:"secret"`
 }
 
 func (c *Client) GetProject(id int64) (*Project, error) {

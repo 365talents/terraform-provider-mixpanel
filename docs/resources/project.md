@@ -33,6 +33,7 @@ resource "mixpanel_project" "myproject" {
 
 - `api_key` (String, Sensitive)
 - `id` (Number) The ID of this resource.
+- `secret` (String, Sensitive)
 - `token` (String, Sensitive)
 
 ## Import

@@ -27,5 +27,6 @@ data "mixpanel_project" "project" {
 - `domain` (String)
 - `id` (Number) The ID of this resource.
 - `name` (String)
+- `secret` (String, Sensitive)
 - `timezone` (String)
 - `token` (String, Sensitive)
