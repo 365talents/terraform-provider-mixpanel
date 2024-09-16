@@ -61,6 +61,7 @@ func (c *Client) GetProject(id int64) (*Project, error) {
 		Timezone: response.Results.Timezone,
 		ApiKey:   response.Results.ApiKey,
 		Token:    response.Results.Token,
+		Secret:   response.Results.Secret,
 	}
 
 	if response.Results.Domain == "eu.mixpanel.com" {
