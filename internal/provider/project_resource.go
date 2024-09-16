@@ -90,6 +90,10 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:  true,
 				Sensitive: true,
 			},
+			"secret": schema.StringAttribute{
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -252,5 +256,6 @@ func ProjectToProjectModel(project *mixpanel.Project) ProjectModel {
 		Timezone: basetypes.NewStringValue(project.Timezone),
 		ApiKey:   basetypes.NewStringValue(project.ApiKey),
 		Token:    basetypes.NewStringValue(project.Token),
+		Secret:   basetypes.NewStringValue(project.Secret),
 	}
 }

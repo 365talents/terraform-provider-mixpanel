@@ -59,6 +59,10 @@ func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:  true,
 				Sensitive: true,
 			},
+			"secret": schema.StringAttribute{
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -70,6 +74,7 @@ type ProjectModel struct {
 	Timezone basetypes.StringValue `tfsdk:"timezone"`
 	ApiKey   basetypes.StringValue `tfsdk:"api_key"`
 	Token    basetypes.StringValue `tfsdk:"token"`
+	Secret   basetypes.StringValue `tfsdk:"secret"`
 }
 
 // Read refreshes the Terraform state with the latest data.
