@@ -77,5 +77,6 @@ jobs:
           TF_ACC: "1"
           MIXPANEL_SERVICE_ACCOUNT_USERNAME: ${{ secrets.MIXPANEL_SERVICE_ACCOUNT_USERNAME }}
           MIXPANEL_SERVICE_ACCOUNT_SECRET: ${{ secrets.MIXPANEL_SERVICE_ACCOUNT_SECRET }}
+          MIXPANEL_TEST_PROJECT_ID: ${{ secrets.MIXPANEL_TEST_PROJECT_ID }}
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10

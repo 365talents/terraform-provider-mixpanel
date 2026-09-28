@@ -41,6 +41,16 @@ func NewClient(serviceAccountUsername, serviceAccountSecret *string, concurrentR
 	return &c, nil
 }
 
+// APIError is returned by doRequest for non-2xx responses.
+type APIError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("status: %d, body: %s", e.StatusCode, e.Body)
+}
+
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Authorization", c.AuthHeader)
 
@@ -58,7 +68,7 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	body, err := io.ReadAll(res.Body)
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+		return nil, &APIError{StatusCode: res.StatusCode, Body: string(body)}
 	}
 
 	return body, err

@@ -142,6 +142,8 @@ func (p *MixpanelProvider) Configure(ctx context.Context, req provider.Configure
 func (p *MixpanelProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectResource,
+		NewServiceAccountResource,
+		NewServiceAccountProjectMembershipResource,
 	}
 }
 
