@@ -208,9 +208,9 @@ func (r *serviceAccountProjectMembershipResource) Delete(ctx context.Context, re
 }
 
 func (r *serviceAccountProjectMembershipResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	serviceAccountId, projectId, err := parseMembershipId(req.ID)
+	serviceAccountId, projectId, err := parseIdPair(req.ID)
 	if err != nil {
-		resp.Diagnostics.AddError("Invalid ID", err.Error())
+		resp.Diagnostics.AddError("Invalid ID", "Expected <service_account_id>/<project_id>: "+err.Error())
 		return
 	}
 
@@ -218,14 +218,15 @@ func (r *serviceAccountProjectMembershipResource) ImportState(ctx context.Contex
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), projectId)...)
 }
 
-func parseMembershipId(id string) (int64, int64, error) {
+// parseIdPair parses an import ID like "<service_account_id>/<project_id>".
+func parseIdPair(id string) (int64, int64, error) {
 	parts := strings.Split(id, "/")
 	if len(parts) == 2 {
-		serviceAccountId, err1 := strconv.ParseInt(parts[0], 10, 64)
-		projectId, err2 := strconv.ParseInt(parts[1], 10, 64)
+		first, err1 := strconv.ParseInt(parts[0], 10, 64)
+		second, err2 := strconv.ParseInt(parts[1], 10, 64)
 		if err1 == nil && err2 == nil {
-			return serviceAccountId, projectId, nil
+			return first, second, nil
 		}
 	}
-	return 0, 0, fmt.Errorf("ID must be <service_account_id>/<project_id>, got %q", id)
+	return 0, 0, fmt.Errorf("ID must be two integers separated by a slash, like 123/456, got %q", id)
 }
