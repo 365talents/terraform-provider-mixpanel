@@ -37,6 +37,8 @@ resource "mixpanel_service_account_project_membership" "backend" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Memberships can be imported by <service_account_id>/<project_id>.
 terraform import mixpanel_service_account_project_membership.backend 123/456
