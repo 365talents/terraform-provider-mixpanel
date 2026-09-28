@@ -1,6 +1,6 @@
 # Terraform Provider for Mixpanel
 
-Terraform provider to manage [Mixpanel](https://mixpanel.com) projects and service accounts, built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). Published on the Terraform Registry as [`365talents/mixpanel`](https://registry.terraform.io/providers/365talents/mixpanel).
+Terraform provider to manage [Mixpanel](https://mixpanel.com) projects, service accounts and teams, built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). Published on the Terraform Registry as [`365talents/mixpanel`](https://registry.terraform.io/providers/365talents/mixpanel).
 
 ## Resources and data sources
 
@@ -9,6 +9,8 @@ Terraform provider to manage [Mixpanel](https://mixpanel.com) projects and servi
 | [`mixpanel_project`](docs/resources/project.md) | Project (name, domain, timezone). Destroying it only removes it from the state, see [Acceptance tests](#acceptance-tests). |
 | [`mixpanel_service_account`](docs/resources/service_account.md) | Organization service account |
 | [`mixpanel_service_account_project_membership`](docs/resources/service_account_project_membership.md) | Role of a service account in a project |
+| [`mixpanel_team`](docs/resources/team.md) | Organization team (uses the Mixpanel UI endpoints, no public API) |
+| [`mixpanel_team_project_assignment`](docs/resources/team_project_assignment.md) | Role of a team in a project |
 | [`mixpanel_project` (data source)](docs/data-sources/project.md) | Look up a project by name |
 
 ## Usage
