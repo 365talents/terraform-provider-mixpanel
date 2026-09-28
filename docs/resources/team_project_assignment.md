@@ -37,6 +37,8 @@ resource "mixpanel_team_project_assignment" "developers" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Assignments can be imported by <team_id>/<project_id>.
 terraform import mixpanel_team_project_assignment.developers 123/456

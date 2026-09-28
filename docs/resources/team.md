@@ -33,6 +33,8 @@ resource "mixpanel_team" "developers" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Teams can be imported by their numeric id.
 terraform import mixpanel_team.developers 123
