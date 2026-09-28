@@ -3,12 +3,12 @@
 page_title: "mixpanel_project Resource - mixpanel"
 subcategory: ""
 description: |-
-  
+  Mixpanel project. Destroying it only removes it from the Terraform state: only owners can delete projects, and service accounts can be at most admin. Delete it in the Mixpanel UI.
 ---
 
 # mixpanel_project (Resource)
 
-
+Mixpanel project. Destroying it only removes it from the Terraform state: only owners can delete projects, and service accounts can be at most admin. Delete it in the Mixpanel UI.
 
 ## Example Usage
 

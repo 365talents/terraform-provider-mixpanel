@@ -4,6 +4,7 @@
 package provider
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -14,14 +15,16 @@ import (
 // acceptance testing. The factory function will be invoked for every Terraform
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
-// nolint:unused
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"scaffolding": providerserver.NewProtocol6WithError(New("test")()),
+	"mixpanel": providerserver.NewProtocol6WithError(New("test")()),
 }
 
-// nolint:unused
+// testAccPreCheck fails the test when a Mixpanel env var is missing, so a
+// missing secret in CI doesn't go unnoticed.
 func testAccPreCheck(t *testing.T) {
-	// You can add code here to run prior to any test case execution, for example assertions
-	// about the appropriate environment variables being set are common to see in a pre-check
-	// function.
+	for _, name := range []string{"MIXPANEL_SERVICE_ACCOUNT_USERNAME", "MIXPANEL_SERVICE_ACCOUNT_SECRET", "MIXPANEL_TEST_PROJECT_ID"} {
+		if os.Getenv(name) == "" {
+			t.Fatalf("%s must be set for acceptance tests", name)
+		}
+	}
 }
