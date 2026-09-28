@@ -63,6 +63,8 @@ func (r *projectResource) Metadata(_ context.Context, req resource.MetadataReque
 // Schema defines the schema for the resource.
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "Mixpanel project. Destroying it only removes it from the Terraform state: " +
+			"only owners can delete projects, and service accounts can be at most admin. Delete it in the Mixpanel UI.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed: true,
@@ -189,7 +191,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Not Implemented, Service Account does not have permission to delete projects and we don't support any other authentication method yet
+	// Not implemented: only owners can delete projects, and service accounts can be at most admin.
 }
 
 // Create creates the resource and sets the initial Terraform state.

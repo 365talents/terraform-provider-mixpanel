@@ -55,7 +55,36 @@ To compile the provider, run `go install`. This will build the provider and put 
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+## Acceptance tests
+
+Acceptance tests run against the real Mixpanel API. Each test creates what it needs (service accounts, memberships, ...) and deletes it at the end. If a run is interrupted, delete the leftover `tf-acc-*` resources by hand in the Mixpanel organization settings.
+
+Projects are the exception: only owners can delete them, and service accounts can be at most admin, so the provider can't delete a project. The `mixpanel_project` test is disabled for that reason.
+
+Tests are skipped when the credentials below are not set.
+
+### Service account
+
+Create a dedicated service account in Mixpanel, under **Organization Settings > Service Accounts**, with the **Admin** organization role. Admin is needed to create projects and manage service accounts.
+
+Use a test organization if you have one: the tests create real resources.
+
+### Environment variables
+
+| Variable | Description |
+|---|---|
+| `MIXPANEL_SERVICE_ACCOUNT_USERNAME` | Username of the service account above |
+| `MIXPANEL_SERVICE_ACCOUNT_SECRET` | Secret of the service account above |
+
+Locally:
+
+```shell
+export MIXPANEL_SERVICE_ACCOUNT_USERNAME=...
+export MIXPANEL_SERVICE_ACCOUNT_SECRET=...
+make testacc
+```
+
+In CI, add both as repository secrets (**Settings > Secrets and variables > Actions**) with the same names. `.github/workflows/test.yml` passes them to the tests. Workflows triggered from forks don't get the secrets, so the tests are skipped there.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
