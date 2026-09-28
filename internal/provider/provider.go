@@ -144,6 +144,8 @@ func (p *MixpanelProvider) Resources(ctx context.Context) []func() resource.Reso
 		NewProjectResource,
 		NewServiceAccountResource,
 		NewServiceAccountProjectMembershipResource,
+		NewTeamResource,
+		NewTeamProjectAssignmentResource,
 	}
 }
 
