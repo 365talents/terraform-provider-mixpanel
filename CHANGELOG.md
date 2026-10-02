@@ -1,3 +1,9 @@
+## 1.3.1 (2026-10-02)
+
+ENHANCEMENTS:
+
+- Provider: fewer requests to Mixpanel. The organization is looked up once instead of before each organization request, and the teams list is fetched once instead of once per `mixpanel_team` and `mixpanel_team_project_assignment`. `mixpanel_service_account_project_membership` reuses the region of the project read by `mixpanel_project`.
+
 ## 1.3.0 (2026-09-28)
 
 FEATURES:
