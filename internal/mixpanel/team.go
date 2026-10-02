@@ -18,7 +18,16 @@ type TeamProject struct {
 	Role string `json:"role"`
 }
 
+// ListTeams fetches the teams once and caches them, so that reading many
+// assignments costs one request. Concurrent callers wait for the in-flight
+// request. Team writes invalidate the cache.
 func (c *Client) ListTeams() ([]Team, error) {
+	c.teamsMutex.Lock()
+	defer c.teamsMutex.Unlock()
+	if c.teams != nil {
+		return c.teams, nil
+	}
+
 	orgId, err := c.organizationId()
 	if err != nil {
 		return nil, err
@@ -33,7 +42,14 @@ func (c *Client) ListTeams() ([]Team, error) {
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	return response.Results, nil
+	c.teams = response.Results
+	return c.teams, nil
+}
+
+func (c *Client) invalidateTeams() {
+	c.teamsMutex.Lock()
+	c.teams = nil
+	c.teamsMutex.Unlock()
 }
 
 // GetTeam returns nil if the team does not exist.
@@ -59,6 +75,7 @@ func (c *Client) CreateTeam(name string) (*Team, error) {
 	}
 
 	body, err := c.doJSON("POST", fmt.Sprintf("%s/organizations/%d/add-teams/", c.HostURL, orgId), map[string]any{"teamNames": []string{name}})
+	c.invalidateTeams()
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +109,7 @@ func (c *Client) AddProjectToTeam(teamId, projectId int64, role string) error {
 	if err != nil {
 		return err
 	}
+	defer c.invalidateTeams()
 
 	_, err = c.doJSON("POST", fmt.Sprintf("%s/organizations/%d/add-projects-to-teams/", c.HostURL, orgId), map[string]any{
 		"teams":                []map[string]any{{"id": teamId, "projects": []map[string]any{{"id": projectId, "role": role}}}},
@@ -105,6 +123,7 @@ func (c *Client) RemoveProjectFromTeam(teamId, projectId int64) error {
 	if err != nil {
 		return err
 	}
+	defer c.invalidateTeams()
 
 	_, err = c.doJSON("POST", fmt.Sprintf("%s/organizations/%d/teams/%d/delete-projects/", c.HostURL, orgId, teamId), map[string]any{"projectIds": []int64{projectId}})
 	return err
@@ -115,6 +134,7 @@ func (c *Client) DeleteTeam(id int64) error {
 	if err != nil {
 		return err
 	}
+	defer c.invalidateTeams()
 
 	_, err = c.doJSON("POST", fmt.Sprintf("%s/organizations/%d/delete-teams/", c.HostURL, orgId), map[string]any{"teamIds": []int64{id}})
 	return err
@@ -125,6 +145,7 @@ func (c *Client) UpdateTeamName(id int64, name string) error {
 	if err != nil {
 		return err
 	}
+	defer c.invalidateTeams()
 
 	_, err = c.doJSON("POST", fmt.Sprintf("%s/organizations/%d/teams/%d/update/", c.HostURL, orgId, id), map[string]any{"name": name})
 	return err

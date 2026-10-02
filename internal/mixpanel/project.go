@@ -69,6 +69,7 @@ func (c *Client) GetProject(id int64) (*Project, error) {
 	} else {
 		project.Domain = "US"
 	}
+	c.projectDomains.Store(id, project.Domain)
 
 	return &project, nil
 }
@@ -93,13 +94,10 @@ func (c *Client) CreateProject(project *Project) (*Project, error) {
 		return nil, err
 	}
 
-	organization, err := c.GetOrganizations()
+	organizationId, err := c.organizationId()
 	if err != nil {
 		return nil, err
 	}
-
-	// We only support one organization for now
-	organizationId := organization[0].Id
 
 	data := createProjectBody{
 		Name:       project.Name,

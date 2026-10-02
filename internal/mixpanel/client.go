@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"golang.org/x/sync/semaphore"
@@ -17,6 +18,17 @@ type Client struct {
 	HTTPClient *http.Client
 	AuthHeader string
 	Semaphore  *semaphore.Weighted
+
+	// Cached for the lifetime of the provider process, see organizationId.
+	orgMutex sync.Mutex
+	orgId    int64
+
+	// Cached until a team write, see ListTeams.
+	teamsMutex sync.Mutex
+	teams      []Team
+
+	// Project id to domain ("US" or "EU"), filled by GetProject. A project's domain can't change.
+	projectDomains sync.Map
 }
 
 func NewClient(serviceAccountUsername, serviceAccountSecret *string, concurrentRequests int64) (*Client, error) {

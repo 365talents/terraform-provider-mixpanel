@@ -31,7 +31,15 @@ func IsNotFound(err error) bool {
 	return errors.As(err, &apiErr) && apiErr.StatusCode == http.StatusNotFound
 }
 
+// organizationId looks the organization up once, concurrent callers wait for it.
+// Errors are not cached.
 func (c *Client) organizationId() (int64, error) {
+	c.orgMutex.Lock()
+	defer c.orgMutex.Unlock()
+	if c.orgId != 0 {
+		return c.orgId, nil
+	}
+
 	organizations, err := c.GetOrganizations()
 	if err != nil {
 		return 0, err
@@ -40,7 +48,8 @@ func (c *Client) organizationId() (int64, error) {
 		return 0, fmt.Errorf("no Mixpanel organization found")
 	}
 	// We only support one organization for now
-	return organizations[0].Id, nil
+	c.orgId = organizations[0].Id
+	return c.orgId, nil
 }
 
 func (c *Client) doJSON(method, url string, data any) ([]byte, error) {
@@ -155,12 +164,17 @@ func (c *Client) RemoveServiceAccountFromProject(serviceAccountId, projectId int
 // GetProjectServiceAccounts lists the service accounts that are members of a project.
 func (c *Client) GetProjectServiceAccounts(projectId int64) ([]ServiceAccountProjectMember, error) {
 	// Project endpoints must be called on the project's region, e.g. eu.mixpanel.com.
-	project, err := c.GetProject(projectId)
-	if err != nil {
-		return nil, err
+	// The mixpanel_project read usually ran before and cached it.
+	domain, ok := c.projectDomains.Load(projectId)
+	if !ok {
+		project, err := c.GetProject(projectId)
+		if err != nil {
+			return nil, err
+		}
+		domain = project.Domain
 	}
 	host := c.HostURL
-	if project.Domain == "EU" {
+	if domain == "EU" {
 		host = strings.Replace(c.HostURL, "://", "://eu.", 1)
 	}
 
